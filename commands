@@ -1,0 +1,112 @@
+Установка:
+sudo apt update
+sudo apt install python3 python3-pip python3-venv
+python3 --version
+
+(в vscode):
+python3-m venv venv
+source venv/bin/activate
+
+pip install django djangorestframework
+pip install psycopg-binary
+pip install pytest pytest-django coverage
+pip install pylint
+pip install pylint-django
+pylint --load-plugins=pylint_django models.py
+pip install drf-yasg
+
+sudo apt install postgresql postgresql-contrib
+
+sudo -u postgres psql
+CREATE DATABASE mydb;
+CREATE USER myuser WITH PASSWORD 'mypassword';
+GRANT ALL PRIVILEGES ON DATABASE mydb TO myuser;
+\q
+
+sudo -i -u postgres
+psql
+
+для пользователя postgres:
+sirius
+
+CREATE DATABASE partnersdb;
+CREATE USER partner WITH PASSWORD 'sirius2025';
+GRANT ALL PRIVILEGES ON DATABASE partnerdb TO partner;
+
+GRANT ALL PRIVILEGES ON SCHEMA public TO partner;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO partner;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO partner;
+
+
+Линтер (pylint): 
+Вид/Палитра комманд/Preferences/Открыть пользовательские настройки (JSON)/.vscode/settings.json:
+
+{
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true
+}
+
+Миграции:
+python manage.py makemigrations
+python manage.py migrate
+
+(python manage.py makemigrations partners_accounting
+python manage.py migrate
+python manage.py showmigration)
+
+ER-диаграмма
+
+pip install django-extensions
+sudo app install graphviz
+
+pip install pygraphviz
+python manage.py graph_models -a -g -o er_diagram.png
+
+settings.py:
+INSTALLED_APPS: 'django-extensions'
+GRAPH_MODELS={
+    'all_applications': True,
+    'graph_models': True}
+
+альтернативный вариант:
+python manage.py graph_models [название приложения] --dot > er_diagram.dot
+dot -Tpng er_diagram.dot -o er_diagram.png
+
+# pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" --install-option="--library-path=/usr/lib/graphviz"
+# CFLAGS="-I/opt/homebrew/include/graphviz" \
+# LDFLAGS="-L/opt/homebrew/lib/graphviz" \
+
+
+Pylint:
+pip install pylint
+
+pip install pylint-django
+pylint --generate-rcfile > .pylintrc
+[MASTER]
+```load-plugins=pylint_django
+django-settings-module=mysite.settings```
+export DJANGO_SETTINGS_MODULE=mysite.settings
+pylint --load-plugins=pylint_django models.py
+
+
+Тесты:
+pytest
+
+coverage run --source='.' manage.py test
+coverage report
+
+Проверка совместимости с версией Python:
+pip freeze | grep swagger
+pip freeze | grep drf-yasg
+
+
+Права доступа и админка:
+python manage.py createsuperuser
+Имя пользователя.
+Пароль.
+
+curl -u username:password http://localhost:8000/api/partners/
+
+curl -X POST -u admin:password -H "Content-Type: application/json" \
+-d '{"name": "New Partner", "partner_type": 1}' \
+http://localhost:8000/api/partners/
