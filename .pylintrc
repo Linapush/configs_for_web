@@ -1,0 +1,7 @@
+[MASTER]
+disable=C0114,C0115,C0116,R0903,R0902,W0612,W0613,W0611
+reports=y
+output-format=text
+
+[MESSAGES CONTROL]
+enable=W0611,C0114,C0115

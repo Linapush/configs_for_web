@@ -1,56 +1,44 @@
 Установка:
 sudo apt update
 sudo apt install python3 python3-pip python3-venv
-python3 --version
 
-(в среде разработки):
 sudo apt install -y python3-venv
-python3-m venv venv
-source venv/bin/activate
-deactivate
+python3 -c "import venv; print(venv.__file__)"
+python3 -m venv venv source venv/bin/activate deactivate
 
-pip install django djangorestframework
-pip install psycopg-binary
-pip install pytest pytest-django coverage
-pip install pylint
-pip install pylint-django
-pylint --load-plugins=pylint_django models.py
-pip install drf-yasg
+pip install django djangorestframework drf-yasg psycopg-binary сoverage pylint flake8 pytest pytest-django
 
+Postgres:
 sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl status postgresql
 
 sudo -u postgres psql
+; sudo -i -u postgres
+
 CREATE DATABASE mydb;
 CREATE USER myuser WITH PASSWORD 'mypassword';
 GRANT ALL PRIVILEGES ON DATABASE mydb TO myuser;
-\q
+\q - выход
 
-sudo -i -u postgres
-psql
+для проверки защиты (pg_hba.conf):
+/etc/postgresql/<version>/main/pg_hba.conf
+sudo -u postgres psql -c 'SHOW hba_file;'
+sudo nano /etc/postgresql/<version>/main/pg_hba.conf
 
-для пользователя postgres:
-sirius
-
-CREATE DATABASE partnersdb;
-CREATE USER partner WITH PASSWORD 'sirius2025';
-GRANT ALL PRIVILEGES ON DATABASE partnerdb TO partner;
-
-GRANT ALL PRIVILEGES ON SCHEMA public TO partner;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO partner;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO partner;
-
-
-Линтер (pylint): 
-Вид/Палитра комманд/Preferences/Открыть пользовательские настройки (JSON)/.vscode/settings.json:
-
-{
-  "python.linting.enabled": true,
-  "python.linting.pylintEnabled": true
-}
+в pg_hba.conf проверить:
+host    all             all             127.0.0.1/32            md5
+sudo systemctl restart postgresql
+выполнение скрипта c заполнением базы:
+psql -h 127.0.0.1 -p 5434 -U linapush partners -f init_db.ddl
+для пользователя postgres: sirius
+проверка: psql -h 127.0.0.1 -p 5434 -U linapush -d partners
+\dt sirius.*
 
 Миграции:
 python manage.py makemigrations
 python manage.py migrate
+python manage.py sqlmigrate partners_accounting 0001 > schema.sql
 
 (python manage.py makemigrations partners_accounting
 python manage.py migrate
@@ -78,6 +66,24 @@ dot -Tpng er_diagram.dot -o er_diagram.png
 # CFLAGS="-I/opt/homebrew/include/graphviz" \
 # LDFLAGS="-L/opt/homebrew/lib/graphviz" \
 
+Права доступа и админка:
+python manage.py createsuperuser
+Имя пользователя.
+Пароль.
+
+curl -u username:password http://localhost:8000/api/partners/
+
+curl -X POST -u admin:password -H "Content-Type: application/json" \
+-d '{"name": "New Partner", "partner_type": 1}' \
+http://localhost:8000/api/partners/
+
+Линтер (pylint): 
+Вид/Палитра комманд/Preferences/Открыть пользовательские настройки (JSON)/.vscode/settings.json:
+
+{ "python.linting.enabled": true, "python.linting.pylintEnabled": true}
+
+pylint partners --output-format=text > pylint_report.txt
+flake8 partners > flake8_report.txt
 
 Pylint:
 pip install pylint
@@ -96,19 +102,10 @@ pytest
 
 coverage run --source='.' manage.py test
 coverage report
+coverage run manage.py test partners
+coverage html
+open htmlcov/index.html
 
 Проверка совместимости с версией Python:
 pip freeze | grep swagger
 pip freeze | grep drf-yasg
-
-
-Права доступа и админка:
-python manage.py createsuperuser
-Имя пользователя.
-Пароль.
-
-curl -u username:password http://localhost:8000/api/partners/
-
-curl -X POST -u admin:password -H "Content-Type: application/json" \
--d '{"name": "New Partner", "partner_type": 1}' \
-http://localhost:8000/api/partners/

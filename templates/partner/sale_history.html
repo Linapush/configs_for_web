@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}История продаж: {{ partner.name }}{% endblock %}
+{% block content %}
+    <h2>История продаж: {{ partner.name }}</h2>
+
+    {% if sales %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Продукт</th>
+            <th>Количество</th>
+            <th>Дата</th>
+            <th>Цена за единицу</th>
+            <th>Общая сумма</th>
+            {% if user.is_staff %}
+              <th>Действия</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for sale in sales %}
+            <tr>
+              <td>{{ sale.product.title }}</td>
+              <td>{{ sale.quantity }}</td>
+              <td>{{ sale.sale_date|date:"d.m.Y" }}</td>
+              <td>{{ sale.price_per_unit }} ₽</td>
+              <td>{{ sale.total_price }} ₽</td>
+              {% if user.is_staff %}
+                <td>
+                  <a href="{% url 'add_sale' partner.id %}?sale_id={{ sale.id }}" class="btn btn-sm btn-warning">
+                    Редактировать
+                  </a>
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p><strong>Текущая скидка:</strong> {{ discount }}%</p>
+    {% else %}
+      <p>Нет истории продаж.</p>
+    {% endif %}
+
+    {% if user.is_staff %}
+      <a href="{% url 'partner_list' %}" class="btn btn-primary">Назад к списку</a>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Удалить Партнера{% endblock %}
+{% block content %}
+    <h2>Удалить "{{ partner.name }}"?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Да, удалить</button>
+        <a href="{% url 'partner_list' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+{% endblock %}
