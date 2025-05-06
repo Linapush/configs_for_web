@@ -140,3 +140,43 @@ class SomeoneModelTest(TestCase):
             "price_per_unit": "100.00"
         })
         self.assertEqual(response.status_code, 302)
+        
+    def get_total_price(self, obj):
+        return obj.quantity * obj.price_per_unit
+    
+    @property
+    def discounted_price(self) -> Decimal:
+        discount = self.partner.calculate_discount()
+        return self.total_price * (Decimal(1) - Decimal(discount) / Decimal(100))
+    
+    def calculate_discount(self) -> int:
+        total_sales = (
+            SaleHistory.objects.filter(partner=self).aggregate(
+                total=models.Sum("quantity")
+            )["total"]
+            or 0
+        )
+        if total_sales < 10_000:
+            return 0
+        elif 10_000 <= total_sales < 50_000:
+            return 5
+        elif 50_000 <= total_sales < 300_000:
+            return 10
+        else:
+            return 15
+
+    def validate_phone(self, value):
+            cleaned_value = value.strip()
+            if not cleaned_value.startswith('+'):
+                raise serializers.ValidationError("Телефон должен начинаться с '+'")
+            
+            digits = ''.join(filter(str.isdigit, cleaned_value[1:]))
+            if len(digits) < 10 or len(digits) > 15:
+                raise serializers.ValidationError("Телефон должен содержать от 10 до 15 цифр")
+
+            return value
+    
+    def validate_coefficient(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Коэффициент должен быть больше нуля")
+        return value

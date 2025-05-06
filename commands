@@ -44,6 +44,8 @@ python manage.py sqlmigrate partners_accounting 0001 > schema.sql
 python manage.py migrate
 python manage.py showmigration)
 
+python manage.py sqlmigrate app_name migration_number
+
 ER-диаграмма
 
 pip install django-extensions
@@ -65,6 +67,11 @@ dot -Tpng er_diagram.dot -o er_diagram.png
 # pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" --install-option="--library-path=/usr/lib/graphviz"
 # CFLAGS="-I/opt/homebrew/include/graphviz" \
 # LDFLAGS="-L/opt/homebrew/lib/graphviz" \
+
+Бекап
+
+python manage.py sqlmigrate your_app_name 0001 > schema.sql
+python manage.py dumpdata > data.json
 
 Права доступа и админка:
 python manage.py createsuperuser
@@ -96,7 +103,6 @@ django-settings-module=mysite.settings```
 export DJANGO_SETTINGS_MODULE=mysite.settings
 pylint --load-plugins=pylint_django models.py
 
-
 Тесты:
 pytest
 
@@ -109,3 +115,8 @@ open htmlcov/index.html
 Проверка совместимости с версией Python:
 pip freeze | grep swagger
 pip freeze | grep drf-yasg
+
+Для соблюдения 3НФ должны выполняться следующие условия:
+База данных находится во второй нормальной форме (2НФ).
+Все неключевые атрибуты зависят только от первичного ключа.
+Нет транзитивных зависимостей (например, если A → B и B → C, то A → C не должно быть).
